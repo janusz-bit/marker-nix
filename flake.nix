@@ -31,7 +31,7 @@
 
         # 2. Generate Nix Overlay from uv.lock (via workspace)
         uvLockedOverlay = workspace.mkPyprojectOverlay {
-          sourcePreference = "wheel"; # Or "sdist"
+          sourcePreference = "sdist"; # Or "sdist"
         };
 
         # 3. Placeholder for Your Custom Package Overrides
