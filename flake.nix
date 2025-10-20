@@ -18,11 +18,26 @@
     pyproject-build-systems.inputs.pyproject-nix.follows = "pyproject-nix";
   };
 
-  outputs = { self, nixpkgs, flake-utils, uv2nix, pyproject-nix, pyproject-build-systems, ... }:
-    flake-utils.lib.eachDefaultSystem (system:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      flake-utils,
+      uv2nix,
+      pyproject-nix,
+      pyproject-build-systems,
+      ...
+    }:
+    flake-utils.lib.eachDefaultSystem (
+      system:
       let
         pkgs = import nixpkgs { inherit system; };
-        python = pkgs.python314; # Your desired Python version
+        python = pkgs.python314.withPackages (
+          python-pkgs: with python-pkgs; [
+            setuptools
+            # Your desired Python version
+          ]
+        );
 
         # 1. Load Project Workspace (parses pyproject.toml, uv.lock)
         workspace = uv2nix.lib.workspace.loadWorkspace {
@@ -36,17 +51,17 @@
 
         # 3. Placeholder for Your Custom Package Overrides
         myCustomOverrides = final: prev: {
-          /* e.g., some-package = prev.some-package.overridePythonAttrs (...); */
+          # e.g., some-package = prev.some-package.overridePythonAttrs (...);
         };
 
         # 4. Construct the Final Python Package Set
-        pythonSet =
-          (pkgs.callPackage pyproject-nix.build.packages { inherit python; })
-          .overrideScope (nixpkgs.lib.composeManyExtensions [
+        pythonSet = (pkgs.callPackage pyproject-nix.build.packages { inherit python; }).overrideScope (
+          nixpkgs.lib.composeManyExtensions [
             pyproject-build-systems.overlays.default # For build tools
-            uvLockedOverlay                          # Your locked dependencies
-            myCustomOverrides                        # Your fixes
-          ]);
+            uvLockedOverlay # Your locked dependencies
+            myCustomOverrides # Your fixes
+          ]
+        );
 
         # --- This is where your project's metadata is accessed ---
         projectNameInToml = "marker-nix"; # MUST match [project.name] in pyproject.toml!
@@ -54,9 +69,7 @@
         # ---
 
         # 5. Create the Python Runtime Environment
-        appPythonEnv = pythonSet.mkVirtualEnv 
-          (thisProjectAsNixPkg.pname + "-env") 
-          workspace.deps.default; # Uses deps from pyproject.toml [project.dependencies]
+        appPythonEnv = pythonSet.mkVirtualEnv (thisProjectAsNixPkg.pname + "-env") workspace.deps.default; # Uses deps from pyproject.toml [project.dependencies]
 
       in
       {
