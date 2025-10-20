@@ -32,12 +32,7 @@
       system:
       let
         pkgs = import nixpkgs { inherit system; };
-        python = pkgs.python3.withPackages (
-          python-pkgs: with python-pkgs; [
-            setuptools
-            # Your desired Python version
-          ]
-        );
+        python = pkgs.python3;
 
         # 1. Load Project Workspace (parses pyproject.toml, uv.lock)
         workspace = uv2nix.lib.workspace.loadWorkspace {
@@ -46,12 +41,16 @@
 
         # 2. Generate Nix Overlay from uv.lock (via workspace)
         uvLockedOverlay = workspace.mkPyprojectOverlay {
-          sourcePreference = "sdist"; # Or "sdist"
+          sourcePreference = "wheel"; # Or "sdist"
         };
 
         # 3. Placeholder for Your Custom Package Overrides
         myCustomOverrides = final: prev: {
           # e.g., some-package = prev.some-package.overridePythonAttrs (...);
+          python3 = prev.python3.withPackages (python-pkgs: [
+            # select Python packages here
+            python-pkgs.setuptools
+          ]);
         };
 
         # 4. Construct the Final Python Package Set
