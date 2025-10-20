@@ -74,7 +74,7 @@
       {
 
         # Nix Package for Your Application
-        packages.default = appPythonEnv;
+        packages.default = [appPythonEnv pkgs.gcc.cc pkgs.glibc pkgs.zlib];
       }
     );
 }
