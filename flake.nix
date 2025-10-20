@@ -70,11 +70,23 @@
         # 5. Create the Python Runtime Environment
         appPythonEnv = pythonSet.mkVirtualEnv (thisProjectAsNixPkg.pname + "-env") workspace.deps.default; # Uses deps from pyproject.toml [project.dependencies]
 
+        Fixed-appPythonEnv = appPythonEnv.overrideAttrs (oldAttrs: {
+          # Dodajemy zlib do istniejących buildInputs
+          buildInputs = oldAttrs.buildInputs ++ [
+            pkgs.gcc.cc
+            pkgs.glibc
+            pkgs.zlib
+          ];
+
+          # Możesz też nadpisać inne rzeczy, np. wersję (choć do tego lepszy jest .override)
+          # version = "2.10-zlib";
+        });
+
       in
       {
 
         # Nix Package for Your Application
-        packages.default = [appPythonEnv pkgs.gcc.cc pkgs.glibc pkgs.zlib];
+        packages.default = Fixed-appPythonEnv;
       }
     );
 }
