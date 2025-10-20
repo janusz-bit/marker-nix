@@ -9,3 +9,5 @@ dependencies = [
     "streamlit>=1.50.0",
     "streamlit-ace>=0.1.1",
 ]
+[tool.uv.extra-build-dependencies]
+"Brotli-1.1.0" = ["setuptools"]
