@@ -32,7 +32,7 @@
       system:
       let
         pkgs = import nixpkgs { inherit system; };
-        python = pkgs.python314.withPackages (
+        python = pkgs.python3.withPackages (
           python-pkgs: with python-pkgs; [
             setuptools
             # Your desired Python version
