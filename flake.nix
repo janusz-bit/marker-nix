@@ -22,7 +22,7 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
-        python = pkgs.python312; # Your desired Python version
+        python = pkgs.python314; # Your desired Python version
 
         # 1. Load Project Workspace (parses pyproject.toml, uv.lock)
         workspace = uv2nix.lib.workspace.loadWorkspace {
@@ -49,7 +49,7 @@
           ]);
 
         # --- This is where your project's metadata is accessed ---
-        projectNameInToml = "tbbs-snapshots"; # MUST match [project.name] in pyproject.toml!
+        projectNameInToml = "marker-nix"; # MUST match [project.name] in pyproject.toml!
         thisProjectAsNixPkg = pythonSet.${projectNameInToml};
         # ---
 
